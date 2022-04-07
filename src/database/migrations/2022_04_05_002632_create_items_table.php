@@ -17,7 +17,8 @@ class CreateItemsTable extends Migration
             $table->integer('id')->primary();
             $table->integer('parent_id')->nullable();
             $table->string('by')->nullable();
-            $table->longText('title')->nullable();
+            $table->string('title')->nullable();
+            $table->longText('text')->nullable();
             $table->integer('time')->nullable();
             $table->tinyInteger('type')->nullable();
             $table->timestamps();

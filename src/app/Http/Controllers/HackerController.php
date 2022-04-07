@@ -18,7 +18,7 @@ class HackerController extends Controller
         $data = [];
         $data['best'] = Item::where('best', 1)->get();
         foreach ($data['best'] as $key => $best){
-            $childItems = ItemChild::select('child_id')->where('parent_id', $top->id)->get()->pluck('child_id')->toArray();
+            $childItems = ItemChild::select('child_id')->where('parent_id', $best->id)->get()->pluck('child_id')->toArray();
             $itemVals = Item::whereIn('id', $childItems)->get();
             $data['best'][$key]->comments = $itemVals;
             $data['best'][$key]->time = Carbon::createFromTimestamp($data['best'][$key]->time)->toDateTimeString();
@@ -34,8 +34,8 @@ class HackerController extends Controller
         }
 
         $data['new'] = Item::where('new', 1)->get();
-        foreach ($data['new'] as $key => $best){
-            $childItems = ItemChild::select('child_id')->where('parent_id', $top->id)->get()->pluck('child_id')->toArray();
+        foreach ($data['new'] as $key => $new){
+            $childItems = ItemChild::select('child_id')->where('parent_id', $new->id)->get()->pluck('child_id')->toArray();
             $itemVals = Item::whereIn('id', $childItems)->get();
             $data['new'][$key]->comments = $itemVals;
             $data['new'][$key]->time = Carbon::createFromTimestamp($data['new'][$key]->time)->toDateTimeString();

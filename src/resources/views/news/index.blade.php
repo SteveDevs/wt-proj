@@ -3,8 +3,8 @@
     <h3>Title: {{ $top['title'] }} Time: {{ $top['time'] }}</h3>
     <p>Comments: </p>
     @foreach($top->comments as $comment)
-        <p>By: {{$comment->by}} Time: {{$comment->time}}</p>
-        <p>Title: {{$comment->title}}</p>
+        <p>{{$comment->by}} {{\Carbon\Carbon::createFromTimestamp($comment->time)->toDateTimeString()}}</p>
+        <p>{{$comment->text}}</p>
     @endforeach
 @endforeach
 
@@ -13,8 +13,8 @@
     <h3>Title: {{ $top->title }} Time: {{ $top->time }}</h3>
     <p>Comments: </p>
     @foreach($top->comments as $comment)
-        <p>{{$comment->by}} {{$comment->time}}</p>
-        <p>{{$comment->title}}</p>
+        <p>{{$comment->by}} {{\Carbon\Carbon::createFromTimestamp($comment->time)->toDateTimeString()}}</p>
+        <p>{{$comment->text}}</p>
     @endforeach
 @endforeach
 
@@ -23,7 +23,7 @@
     <p>Title: {{ $top->title }} Time: {{ $top->time }}</p>
     <p>Comments: </p>
     @foreach($top->comments as $comment)
-        <p>{{$comment->by}} {{$comment->time}}</p>
-        <p>{{$comment->title}}</p>
+        <p>{{$comment->by}} {{\Carbon\Carbon::createFromTimestamp($comment->time)->toDateTimeString()}}</p>
+        <p>{{$comment->text}}</p>
     @endforeach
 @endforeach

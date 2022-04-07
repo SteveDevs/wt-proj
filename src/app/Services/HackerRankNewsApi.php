@@ -40,14 +40,9 @@ class HackerRankNewsApi{
             //$this->removeChildren($itemChilds);
             //Item::where('id', $d)->delete();
 
-            Item::where('id', $d)->where('type', 1)->update([
-                SELF::typeStories[$typeStories] => 1
-            ]);
 			$url = SELF::baseUrl . 'item/' . $d . '.json?print=pretty';
             $item = $this->decoded($url);
-            if(isset($item->kids)){
-                $this->recursivelyCreateChildren($item->id, $item->kids);
-            }
+
             $exists = Item::where('id', $item->id)->first();
             if($exists === null){
                 $type = $this->checkTypeInsert($item->type);
@@ -56,17 +51,20 @@ class HackerRankNewsApi{
                 $itemObj->parent_id = $item->parent ?? null;
                 $itemObj->by = $item->by ?? null;
                 $itemObj->title = $item->title ?? null;
+                $itemObj->text  = $item->text ?? null;
                 $itemObj->time = $item->time ?? null;
                 $itemObj->type = $type ?? null;
                 $itemObj->save();
             }
 
+            Item::where('id', $d)->where('type', 1)->update([
+                SELF::typeStories[$typeStories] => 1
+            ]);
+
             if(isset($item->kids)){
                 $this->recursivelyCreateChildren($item->id, $item->kids);
             }
-
 		}
-
 	}
 
     public function recursivelyCreateChildren($parentId, $itemChilds)
@@ -77,31 +75,39 @@ class HackerRankNewsApi{
             $url = SELF::baseUrl . 'item/' . $itemChild . '.json?print=pretty';
             $item = $this->decoded($url);
 
+            $existsChild = ItemChild::where('parent_id', $parentId)->where('child_id', $itemChild)->first();
+            if($existsChild === null){
+                $this->createArrayChilds[] = [
+                    'parent_id' => $parentId,
+                    'child_id' => $itemChild
+                ];
+            }
             $typeId = isset($item->type) ? $this->checkTypeInsert($item->type) : null;
-            $exits = Item::where('id', $itemChild)->first();
-            if($exits !== null){
+            $existsItem = Item::where('id', $itemChild)->first();
+            if($existsItem === null){
                 $this->itemInsert[] = [
                     'parent_id' => $parentId,
                     'id' => $itemChild,
                     'by'        => $item->by ?? null,
                     'title'     => $item->title ?? null,
+                    'text'     => $item->text ?? null,
                     'time'      => $item->time ?? null,
                     'type'      => $typeId,
                 ];
             }
-      
+
             if(isset($item->kids)){
                 foreach ($item->kids as $kid){
                     $itemChildInner[]['parent'] = $kid;
                     $itemChildInner[]['children'] = ItemChild::select('child_id')->where('parent_id', $kid)->pluck('child_id')->toArray();
                     $exits = ItemChild::where('parent_id', $item->id)->where('child_id', $kid)->first();
-                    if($exits !== null){
-                        continue;
+                    if($exits === null){
+                        $this->createArrayChilds[] = [
+                            'parent_id' => $item->id,
+                            'child_id' => $kid
+                        ];
                     }
-                    $this->createArrayChilds[] = [
-                        'parent_id' => $item->id,
-                        'child_id' => $kid
-                    ];
+
                 }
             }
         }
@@ -133,21 +139,6 @@ class HackerRankNewsApi{
         if(count($moreDeletes) > 0){
             $this->removeChildren($moreDeletes);
         }
-    }
-
-    public function storeItem($item)
-    {
-        //check if item exists and if need to update
-        $typeId = $this->checkTypeInsert($item->type);
-
-        Item::updateOrCreate(['id'=> $item->id],
-            [
-                'parent_id' => $item->parent ?? null,
-                'by'        => $item->by ?? null,
-                'title'     => $item->title ?? null,
-                'time'      => $item->time ?? null,
-                'type'      => $typeId,
-            ]);
     }
 
 	public function decoded(string $url){
